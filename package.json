@@ -3,8 +3,9 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": "ENVIRONMENT=PRODUCTION node ./bin/www",
-    "dev": "PORT=4000 ENVIRONMENT=DEVELOPMENT nodemon ./bin/www"
+    "start": "node ./bin/www",
+    "devMac": "PORT=4000 ENVIRONMENT=DEVELOPMENT nodemon ./bin/www",
+    "devWin": "set PORT=4000 && ENVIRONMENT=DEVELOPMENT && nodemon ./bin/www"
   },
   "dependencies": {
     "cookie-parser": "~1.4.4",
