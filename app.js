@@ -26,7 +26,8 @@ app.set("views", path.join(__dirname, "views"));
 app.set("view engine", "hbs");
 
 // connect DB
-require("./database").connect();
+// require("./database").connect();
+
 //middleware
 app.use(cors());
 app.use(morgan("tiny"));
@@ -41,7 +42,8 @@ app.use(
 );
 app.use(passport.initialize());
 app.use(passport.session());
-require("./passport/passportConfig")(passport);
+
+// require("./passport/passportConfig")(passport);
 
 app.use(logger("dev"));
 app.use(express.json());
