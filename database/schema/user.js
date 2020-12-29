@@ -1,16 +1,16 @@
-const mongoose = require("mongoose");
+const { Schema, model } = require("mongoose");
 
-module.exports = mongoose.model(
-  "user",
-  new mongoose.Schema({
-    password: String,
-    email: String,
-    urlAvatar: String,
-  })
-);
+const user = new Schema({
+  id: String,
+  username: String,
+  email: String,
+  password: String,
+  isOnline: Boolean,
+  isAdmin: Boolean,
+  active: String,
+  totalGame: Number,
+  totalGameWin: Number,
+  totalGameLose: Number,
+});
 
-// User
-// |- email     : String
-// |- password  : String
-// |- urlAvatar : String
-//
+module.exports = model("user", user);
