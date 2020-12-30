@@ -6,7 +6,7 @@ const config = () => {
   // Config for Jwtstrategy
   const option = {};
   option.jwtFromRequest = ExtractJwt.fromAuthHeaderAsBearerToken();
-  option.secretOrKey = "secret";
+  option.secretOrKey = "scretkey";
 
   passport.use(
     new JwtStrategy(option, (jwt_payload, done) => {

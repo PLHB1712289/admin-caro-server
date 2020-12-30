@@ -4,6 +4,7 @@ const user = new Schema({
   id: String,
   username: String,
   email: String,
+  name: String,
   password: String,
   isOnline: Boolean,
   isAdmin: Boolean,

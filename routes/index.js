@@ -3,7 +3,7 @@ const router = express.Router();
 
 /* GET home page. */
 router.get("/", function (req, res, next) {
-  res.render("index", { title: "Admin caro API" });
+  res.send("Admin caro API");
 });
 
 module.exports = router;
