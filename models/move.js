@@ -1,7 +1,6 @@
 const { Schema, model } = require("mongoose");
 
 const move = new Schema({
-  idRoom: String,
   idGame: String,
   board: Array,
   order: Number,
