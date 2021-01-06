@@ -17,6 +17,11 @@ const cors = require("cors");
 const indexRouter = require("./routes/index");
 const authRouter = require("./routes/auth");
 const userRouter = require("./routes/user");
+const adminRouter = require("./routes/admin");
+// const gameRouter = require("./routes/game");
+// const messageRouter = require("./routes/message");
+// const roomRouter = require("./routes/room");
+// const moveRouter = require("./routes/move");
 
 const app = express();
 
@@ -32,6 +37,11 @@ app.use(cookieParser());
 app.use("/", indexRouter);
 app.use("/auth", authRouter);
 app.use("/users", userRouter);
+app.use("/admins", adminRouter);
+// app.use("/games", gameRouter);
+// app.use("/messages", messageRouter);
+// app.use("/moves", moveRouter);
+// app.use("/rooms", roomRouter);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
