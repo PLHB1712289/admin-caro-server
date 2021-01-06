@@ -9,7 +9,18 @@ const {
 } = require("./services");
 
 async function getUsers(req, res) {
-  responeToClient(res, await getAllUsers());
+  // Trich xuat cac thong tin tu payload
+  const payload = keepNecessaryFields(req.query, [
+    "id",
+    "name",
+    "username",
+    "email",
+    "page",
+    "perpage",
+    "sortby",
+    "sortmode",
+  ]);
+  responeToClient(res, await getAllUsers(payload));
 }
 
 async function getUser(req, res) {

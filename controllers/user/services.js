@@ -1,7 +1,31 @@
+const { keepNecessaryFields } = require("../../helpers/objectOperations");
 const { userModel, gameModel } = require("../../models");
 
-async function getAllUsers() {
-  const users = await userModel.find({}).exec();
+async function getAllUsers(requestPayload = {}) {
+  const paging = {
+    page: requestPayload.page || 1,
+    perpage: requestPayload.perpage || 10,
+  };
+  const filtering =
+    (requestPayload.id ||
+      requestPayload.name ||
+      requestPayload.username ||
+      requestPayload.email) &&
+    keepNecessaryFields(requestPayload, ["id", "name", "username", "email"]);
+  const filteringRegEx = Object.keys(filtering || {}).reduce(
+    (obj, key) => ({ ...obj, [key]: new RegExp(filtering[key], "i") }),
+    {}
+  );
+  const sort = {
+    [requestPayload.sortby || "id"]: requestPayload.sortmode || "desc",
+  };
+  const users = await userModel
+    .find(filteringRegEx, null, {
+      sort,
+      skip: (paging.page - 1) * paging.perpage,
+      limit: +paging.perpage,
+    })
+    .exec();
   return { data: { users } };
 }
 
