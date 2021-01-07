@@ -9,7 +9,7 @@ const admin = new Schema({
   password: String,
   name: String,
   created_at: { type: Date, default: Date.now },
-  isSuperAdmin: { Boolean, default: false },
+  isSuperAdmin: { type: Boolean, default: false },
 });
 
 module.exports = model("admin", admin);
