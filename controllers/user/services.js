@@ -16,17 +16,18 @@ async function getAllUsers(requestPayload = {}) {
     (obj, key) => ({ ...obj, [key]: new RegExp(filtering[key], "i") }),
     {}
   );
-  const sort = {
+  const sorting = {
     [requestPayload.sortby || "id"]: requestPayload.sortmode || "desc",
   };
   const users = await userModel
     .find(filteringRegEx, null, {
-      sort,
+      sort: sorting,
       skip: (paging.page - 1) * paging.perpage,
       limit: +paging.perpage,
     })
     .exec();
-  return { data: { users } };
+  const userCount = await userModel.count(filteringRegEx);
+  return { data: { users, paging, sorting, total: userCount } };
 }
 
 async function getUserByUsername(username) {

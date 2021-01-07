@@ -29,7 +29,7 @@ async function getUser(req, res) {
 
 async function updateUser(req, res) {
   // Chi cho phep thay doi cac thong tin binh thuong
-  const fieldWhiteList = ["name"];
+  const fieldWhiteList = ["name", "email"];
 
   responeToClient(
     res,

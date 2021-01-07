@@ -16,17 +16,19 @@ async function getAllAdmins(requestPayload = {}) {
     (obj, key) => ({ ...obj, [key]: new RegExp(filtering[key], "i") }),
     {}
   );
-  const sort = {
-    [requestPayload.sortby || "id"]: requestPayload.sortmode || "desc",
+  const sorting = {
+    [requestPayload.sortby || "_id"]: requestPayload.sortmode || "desc",
   };
   const admins = await adminModel
     .find(filteringRegEx, null, {
-      sort,
+      sort: sorting,
       skip: (paging.page - 1) * paging.perpage,
       limit: +paging.perpage,
     })
     .exec();
-  return { data: { admins } };
+  const adminCount = await adminModel.count(filteringRegEx);
+
+  return { data: { admins, paging, sorting, total: adminCount } };
 }
 
 async function getAdminByUsername(username) {
