@@ -27,7 +27,7 @@ async function getAllGames(requestPayload = {}) {
   };
   const filtering =
     (requestPayload.idRoom ||
-      requestPayload.idGame ||
+      requestPayload._id ||
       requestPayload.player1 ||
       requestPayload.player2 ||
       requestPayload.status ||
@@ -60,36 +60,62 @@ async function getAllGames(requestPayload = {}) {
   return { data: { games: resolvedGames, paging, sorting, total: gameCount } };
 }
 
-async function getGameByIdGame(idGame) {
-  const game = await gameModel.findOne({ idGame }).exec();
+async function getGameById(id) {
+  const game = await gameModel.findById(id).exec();
+  const resolvedGame = await gameUserIdToUsername(game);
+  if (game) return { data: { game: resolvedGame } };
+  return { error: true, message: "This game does not exist" };
+}
+
+async function deleteGameById(id) {
+  const game = await gameModel.findByIdAndDelete(id).exec();
   if (game) return { data: { game } };
   return { error: true, message: "This game does not exist" };
 }
 
-async function deleteGameByIdGame(idGame) {
-  const game = await gameModel.findOneAndDelete({ idGame }).exec();
-  if (game) return { data: { game } };
-  return { error: true, message: "This game does not exist" };
+async function getAllMessagesOfGameById(id) {
+  const game = await gameModel.findById(id).exec();
+  if (!game) return { error: true, message: "This game does not exist" };
+  const messages = await messageModel.find({ idGame: id }).exec();
+  return { data: { messages } };
 }
 
-async function getAllMessagesOfGameByIdGame(idGame) {
-  const game = await gameModel.findOne({ idGame }).exec();
+async function getAllMovesOfGameById(id, requestPayload = {}) {
+  const game = await gameModel.findById(id).exec();
   if (!game) return { error: true, message: "This game does not exist" };
-  const messages = await messageModel.find({ idGame }).exec();
-  return { data: { game, messages } };
-}
 
-async function getAllMovesOfGameByIdGame(idGame) {
-  const game = await gameModel.findOne({ idGame }).exec();
-  if (!game) return { error: true, message: "This game does not exist" };
-  const moves = await moveModel.find({ idGame }).exec();
-  return { data: { game, moves } };
+  const paging = {
+    page: requestPayload.page || 1,
+    perpage: requestPayload.perpage || 1,
+  };
+  const filtering =
+    (requestPayload.order || requestPayload.index) &&
+    keepNecessaryFields(requestPayload, ["order", "index"]);
+  const filteringRegEx = Object.keys(filtering || {}).reduce(
+    (obj, key) => ({ ...obj, [key]: new RegExp(filtering[key], "i") }),
+    { idGame: id }
+  );
+  const sorting = {
+    [requestPayload.sortby || "_id"]: requestPayload.sortmode || "desc",
+  };
+  const moves = await moveModel
+    .find(filteringRegEx, null, {
+      sort: sorting,
+      skip: (paging.page - 1) * paging.perpage,
+      limit: +paging.perpage,
+    })
+    .exec();
+
+  const moveCount = await moveModel.count(filteringRegEx);
+  return {
+    data: { moves, paging, sorting, total: moveCount },
+  };
 }
 
 module.exports = {
   getAllGames,
-  getGameByIdGame,
-  deleteGameByIdGame,
-  getAllMessagesOfGameByIdGame,
-  getAllMovesOfGameByIdGame,
+  getGameById,
+  deleteGameById,
+  getAllMessagesOfGameById,
+  getAllMovesOfGameById,
 };
