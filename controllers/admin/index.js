@@ -19,6 +19,7 @@ async function getAdmins(req, res) {
     "perpage",
     "sortby",
     "sortmode",
+    "right",
   ]);
   responeToClient(res, await getAllAdmins(payload));
 }
