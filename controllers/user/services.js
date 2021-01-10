@@ -17,7 +17,7 @@ async function getAllUsers(requestPayload = {}) {
     {}
   );
   const sorting = {
-    [requestPayload.sortby || "id"]: requestPayload.sortmode || "desc",
+    [requestPayload.sortby || "_id"]: requestPayload.sortmode || "desc",
   };
   const users = await userModel
     .find(filteringRegEx, null, {
