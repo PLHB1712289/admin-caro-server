@@ -1,4 +1,10 @@
-const { roomModel, gameModel } = require("../../models");
+const { keepNecessaryFields } = require("../../helpers/objectOperations");
+const {
+  roomModel,
+  gameModel,
+  messageModel,
+  userModel,
+} = require("../../models");
 
 async function getAllRooms() {
   const rooms = await roomModel.find({}).exec();
@@ -50,11 +56,68 @@ async function getAllGamesOfRoomByIdRoom(idRoom) {
   return { data: { room, games } };
 }
 
+async function getAllMessagesOfRoomByIdRoom(idRoom, requestPayload = {}) {
+  const room = await roomModel.findOne({ idRoom }).exec();
+  if (!room) return { error: true, message: "This room does not exist" };
+
+  const paging = {
+    page: requestPayload.page || 1,
+    perpage: requestPayload.perpage || 10,
+  };
+  const filtering =
+    requestPayload.username &&
+    keepNecessaryFields(requestPayload, ["username"]);
+
+  // Xu ly truong ao `username`
+  let user_ids;
+  if (filtering && filtering.username) {
+    // Tim id de search
+    const users = await userModel
+      .find({ username: new RegExp(filtering.username, "i") })
+      .exec();
+    user_ids = users.map((user) => user.id);
+    delete filtering.username;
+  }
+
+  const filteringRegEx = Object.keys(filtering || {}).reduce(
+    (obj, key) => ({ ...obj, [key]: new RegExp(filtering[key], "i") }),
+    { idRoom }
+  );
+
+  if (user_ids) {
+    filteringRegEx.idUser = { $in: user_ids };
+  }
+
+  const sorting = {
+    [requestPayload.sortby || "_id"]: requestPayload.sortmode || "desc",
+  };
+  let messages = await messageModel
+    .find(filteringRegEx, null, {
+      sort: sorting,
+      skip: (paging.page - 1) * paging.perpage,
+      limit: +paging.perpage,
+    })
+    .exec();
+
+  messages = await Promise.all(
+    messages.map(async (message) => {
+      const user = await userModel.findOne({ id: message.idUser }).exec();
+      return { ...message.toObject(), username: user ? user.username : null };
+    })
+  );
+
+  const messageCount = await messageModel.count(filteringRegEx);
+  return {
+    data: { messages, paging, sorting, total: messageCount },
+  };
+}
+
 module.exports = {
   getAllRooms,
   getRoomByIdRoom,
   getCurrentGameByIdRoom,
   getAllGamesOfRoomByIdRoom,
+  getAllMessagesOfRoomByIdRoom,
   updateRoomByIdRoom,
   deleteRoomByIdRoom,
 };
