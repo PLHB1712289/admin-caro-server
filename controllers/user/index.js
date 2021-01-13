@@ -29,7 +29,7 @@ async function getUser(req, res) {
 
 async function updateUser(req, res) {
   // Chi cho phep thay doi cac thong tin binh thuong
-  const fieldWhiteList = ["name", "email"];
+  const fieldWhiteList = ["name", "email", "active"];
 
   responeToClient(
     res,
@@ -45,7 +45,10 @@ async function deleteUser(req, res) {
 }
 
 async function getUserGames(req, res) {
-  responeToClient(res, await getAllGamesOfUserByUsername(req.params.username));
+  responeToClient(
+    res,
+    await getAllGamesOfUserByUsername(req.params.username, req.query)
+  );
 }
 
 module.exports = { getUsers, getUser, updateUser, deleteUser, getUserGames };
