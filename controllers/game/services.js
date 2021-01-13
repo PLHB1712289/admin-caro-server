@@ -14,6 +14,12 @@ async function gameUserIdToUsername(game) {
   return resolvedGame;
 }
 
+async function messageUserIdToUsername(message) {
+  const resolvedMessage = { ...message.toObject() };
+  resolvedMessage.username = await userIdToUsername(message.idUser);
+  return resolvedMessage;
+}
+
 async function getAllGames(requestPayload = {}) {
   const paging = {
     page: requestPayload.page || 1,
@@ -83,12 +89,21 @@ async function getAllMessagesOfGameById(id, requestPayload = {}) {
     page: requestPayload.page || 1,
     perpage: requestPayload.perpage || 10,
   };
+
   const filtering =
     (requestPayload.message || requestPayload.username) &&
     keepNecessaryFields(requestPayload, ["message", "username"]);
+
+  let defaultFiltering = { idGame: id };
+  // Xu ly truong ao `player`
+  if (filtering && filtering.username) {
+    user_ids = await usernameToUserIdList(filtering.username);
+    defaultFiltering.idUser = { $in: user_ids };
+    delete filtering.username;
+  }
   const filteringRegEx = Object.keys(filtering || {}).reduce(
     (obj, key) => ({ ...obj, [key]: new RegExp(filtering[key], "i") }),
-    { idGame: id }
+    defaultFiltering
   );
   const sorting = {
     [requestPayload.sortby || "_id"]: requestPayload.sortmode || "desc",
@@ -100,10 +115,13 @@ async function getAllMessagesOfGameById(id, requestPayload = {}) {
       limit: +paging.perpage,
     })
     .exec();
+  const resolvedMessages = await Promise.all(
+    messages.map(messageUserIdToUsername)
+  );
 
-  const messageCount = await moveModel.count(filteringRegEx);
+  const messageCount = await messageModel.count(filteringRegEx);
   return {
-    data: { messages, paging, sorting, total: messageCount },
+    data: { messages: resolvedMessages, paging, sorting, total: messageCount },
   };
 }
 
