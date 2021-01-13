@@ -13,6 +13,6 @@ router.get("/:username", getUser);
 router.put("/:username", updateUser);
 router.delete("/:username", deleteUser);
 
-router.get("/:id/games", getUserGames);
+router.get("/:username/games", getUserGames);
 
 module.exports = router;
