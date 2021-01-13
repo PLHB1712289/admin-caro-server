@@ -10,18 +10,7 @@ const {
 
 async function getAdmins(req, res) {
   // Trich xuat cac thong tin tu payload
-  const payload = keepNecessaryFields(req.query, [
-    "id",
-    "name",
-    "username",
-    "email",
-    "page",
-    "perpage",
-    "sortby",
-    "sortmode",
-    "right",
-  ]);
-  responeToClient(res, await getAllAdmins(payload));
+  responeToClient(res, await getAllAdmins(req.query));
 }
 
 async function getAdmin(req, res) {
