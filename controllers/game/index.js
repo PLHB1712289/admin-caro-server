@@ -20,7 +20,10 @@ async function deleteGame(req, res) {
 }
 
 async function getGameMessages(req, res) {
-  responeToClient(res, await getAllMessagesOfGameById(req.params.id));
+  responeToClient(
+    res,
+    await getAllMessagesOfGameById(req.params.id, req.query)
+  );
 }
 
 async function getGameMoves(req, res) {

@@ -1,22 +1,16 @@
-const {
-  gameModel,
-  messageModel,
-  moveModel,
-  userModel,
-} = require("../../models");
+const { keepNecessaryFields } = require("../../helpers/objectOperations");
+const { userIdToUsername } = require("../../helpers/userIdToUser");
+const { usernameToUserIdList } = require("../../helpers/usernameToUserIdList");
+const { gameModel, messageModel, moveModel } = require("../../models");
 
 async function gameUserIdToUsername(game) {
   const resolvedGame = { ...game.toObject() };
-  resolvedGame.player1 = (
-    await userModel.findOne({ id: game.player1 }).exec()
-  )?.username;
-  resolvedGame.player2 = (
-    await userModel.findOne({ id: game.player2 }).exec()
-  )?.username;
-  if (game.winner)
-    resolvedGame.winner = (
-      await userModel.findOne({ id: game.winner }).exec()
-    )?.username;
+  resolvedGame.playerO =
+    resolvedGame.playerX === resolvedGame.player1
+      ? await userIdToUsername(game.player2)
+      : await userIdToUsername(game.player1);
+  resolvedGame.playerX = await userIdToUsername(game.playerX);
+  resolvedGame.winner = await userIdToUsername(game.winner);
   return resolvedGame;
 }
 
@@ -26,23 +20,31 @@ async function getAllGames(requestPayload = {}) {
     perpage: requestPayload.perpage || 10,
   };
   const filtering =
-    (requestPayload.idRoom ||
-      requestPayload._id ||
-      requestPayload.player1 ||
-      requestPayload.player2 ||
-      requestPayload.status ||
-      requestPayload.winner) &&
-    keepNecessaryFields(requestPayload, [
-      "_id",
-      "idRoom",
-      "player1",
-      "player2",
-      "status",
-      "winner",
-    ]);
+    (requestPayload.idRoom || requestPayload.player || requestPayload.winner) &&
+    keepNecessaryFields(requestPayload, ["idRoom", "player", "winner"]);
+  let defaultFiltering = {};
+  // Xu ly truong `status`
+  if (typeof requestPayload.status !== "undefined") {
+    defaultFiltering = { status: requestPayload.status };
+  }
+  // Xu ly truong ao `player`
+  if (filtering && filtering.player) {
+    user_ids = await usernameToUserIdList(filtering.player);
+    defaultFiltering["$or"] = [
+      { player1: { $in: user_ids } },
+      { player2: { $in: user_ids } },
+    ];
+    delete filtering.player;
+  }
+  // Xu ly truong ao `winner`
+  if (filtering && filtering.winner) {
+    user_ids = await usernameToUserIdList(filtering.winner);
+    defaultFiltering.winner = { $in: user_ids };
+    delete filtering.winner;
+  }
   const filteringRegEx = Object.keys(filtering || {}).reduce(
     (obj, key) => ({ ...obj, [key]: new RegExp(filtering[key], "i") }),
-    {}
+    defaultFiltering
   );
   const sorting = {
     [requestPayload.sortby || "_id"]: requestPayload.sortmode || "desc",
@@ -73,11 +75,36 @@ async function deleteGameById(id) {
   return { error: true, message: "This game does not exist" };
 }
 
-async function getAllMessagesOfGameById(id) {
+async function getAllMessagesOfGameById(id, requestPayload = {}) {
   const game = await gameModel.findById(id).exec();
   if (!game) return { error: true, message: "This game does not exist" };
-  const messages = await messageModel.find({ idGame: id }).exec();
-  return { data: { messages } };
+
+  const paging = {
+    page: requestPayload.page || 1,
+    perpage: requestPayload.perpage || 10,
+  };
+  const filtering =
+    (requestPayload.message || requestPayload.username) &&
+    keepNecessaryFields(requestPayload, ["message", "username"]);
+  const filteringRegEx = Object.keys(filtering || {}).reduce(
+    (obj, key) => ({ ...obj, [key]: new RegExp(filtering[key], "i") }),
+    { idGame: id }
+  );
+  const sorting = {
+    [requestPayload.sortby || "_id"]: requestPayload.sortmode || "desc",
+  };
+  const messages = await messageModel
+    .find(filteringRegEx, null, {
+      sort: sorting,
+      skip: (paging.page - 1) * paging.perpage,
+      limit: +paging.perpage,
+    })
+    .exec();
+
+  const messageCount = await moveModel.count(filteringRegEx);
+  return {
+    data: { messages, paging, sorting, total: messageCount },
+  };
 }
 
 async function getAllMovesOfGameById(id, requestPayload = {}) {
