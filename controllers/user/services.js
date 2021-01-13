@@ -52,11 +52,36 @@ async function deleteUserByUsername(username) {
   return { error: true, message: "This user does not exist" };
 }
 
-async function getAllGamesOfUserByUsername(username) {
+async function getAllGamesOfUserByUsername(username, requestPayload = {}) {
+  // const paging = {
+  //   page: requestPayload.page || 1,
+  //   perpage: requestPayload.perpage || 10,
+  // };
+  // const filtering =
+  //   (requestPayload.isOpen || requestPayload.idRoom || requestPayload.name) &&
+  //   keepNecessaryFields(requestPayload, ["idOpen", "idRoom", "name"]);
+  // const filteringRegEx = Object.keys(filtering || {}).reduce(
+  //   (obj, key) => ({ ...obj, [key]: new RegExp(filtering[key], "i") }),
+  //   {}
+  // );
+  // const sorting = {
+  //   [requestPayload.sortby || "_id"]: requestPayload.sortmode || "desc",
+  // };
+  // const rooms = await roomModel
+  //   .find(filteringRegEx, null, {
+  //     sort: sorting,
+  //     skip: (paging.page - 1) * paging.perpage,
+  //     limit: +paging.perpage,
+  //   })
+  //   .exec();
+
+  // const roomCount = await roomModel.count(filteringRegEx);
+  // return { data: { rooms, paging, sorting, total: roomCount } };
+
   const user = await userModel.findOne({ username }).exec();
   if (!user) return { error: true, message: "This user does not exist" };
   const games = await gameModel.find({
-    $or: [{ player1: username }, { player2: username }],
+    $or: [{ player1: user.id }, { player2: user.id }],
   });
   return { data: { games, user } };
 }
