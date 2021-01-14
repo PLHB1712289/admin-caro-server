@@ -14,8 +14,10 @@ const DEVELOPMENT_ENVIRONMENT = {
   title: "development environment",
   URL_CLIENT: "http://localhost:4001",
   SECRET_KEY_JWT: "scretkey",
-  MONGO_DB_URL:
-    "mongodb+srv://car0:car0@cluster0.q9kh1.mongodb.net/car0?retryWrites=true&w=majority",
+  // MONGO_DB_URL:
+  //   "mongodb+srv://car0:car0@cluster0.q9kh1.mongodb.net/car0?retryWrites=true&w=majority",
+
+  MONGO_DB_URL: "mongodb://localhost/car0",
   SECRET_KEY_BCRYPT: 10,
 };
 
