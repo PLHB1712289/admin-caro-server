@@ -12,7 +12,7 @@ async function getUsers(req, res) {
   // Trich xuat cac thong tin tu payload
   const payload = keepNecessaryFields(req.query, [
     "id",
-    "name",
+    "fullname",
     "username",
     "email",
     "page",
