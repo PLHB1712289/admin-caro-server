@@ -1,5 +1,7 @@
 const { keepNecessaryFields } = require("../../helpers/objectOperations");
 const { adminModel } = require("../../models");
+const bcrypt = require("bcryptjs");
+const config = require("../../config");
 
 async function getAllAdmins(requestPayload = {}) {
   const paging = {
@@ -61,7 +63,10 @@ async function deleteAdminByUsername(username) {
 async function createAdmin(info) {
   // TODO: ma hoa mat khau
   try {
+    const hashPassword = bcrypt.hashSync(info.password, config.SECRET_KEY_BCRYPT);
+    info.password=hashPassword;
     const admin = await adminModel.create(info);
+
     return { data: { admin } };
   } catch (_) {
     return { error: true, message: "Cannot create this user" };

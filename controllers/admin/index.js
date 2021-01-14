@@ -49,7 +49,7 @@ async function createAdminAccount(req, res) {
     "password",
     "isSuperAdmin",
   ];
-
+  
   responeToClient(
     res,
     await createAdmin(keepNecessaryFields(req.body, fieldWhiteList))
