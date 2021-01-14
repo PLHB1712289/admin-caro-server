@@ -1,15 +1,8 @@
-const adminModel = require("./admin");
-const gameModel = require("./game");
+// register model
+const userModel = require("./user");
 const messageModel = require("./message");
 const moveModel = require("./move");
 const roomModel = require("./room");
-const userModel = require("./user");
+const gameModel = require("./game");
 
-module.exports = {
-  adminModel,
-  gameModel,
-  messageModel,
-  moveModel,
-  roomModel,
-  userModel,
-};
+module.exports = { userModel, messageModel, moveModel, roomModel, gameModel };

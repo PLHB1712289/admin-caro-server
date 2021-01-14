@@ -26,3 +26,18 @@ admin
   });
 
 module.exports = model("admin", admin);
+
+// ADMIN
+//  |- id            : String  -> ID user
+//  |
+//  |- username      : String  -> username
+//  |
+//  |- email         : String  -> email sign in
+//  |
+//  |- name          : String  -> name
+//  |
+//  |- password      : String  -> password
+//  |
+//  |- isSuperAdmin  : Boolean -> [SuperAdmin, NormalAdmin] = [true, false]
+//  |
+//  '- createdDate   : Date    -> date create user

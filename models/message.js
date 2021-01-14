@@ -1,11 +1,25 @@
-const { Schema, model } = require("mongoose");
+const mongoose = require("mongoose");
 
-const message = new Schema({
-  idRoom: String,
-  idGame: String,
-  idUser: String,
-  message: String,
-  created_at: Date,
-});
+module.exports = mongoose.model(
+  "message",
+  new mongoose.Schema({
+    idRoom: String,
+    idGame: { type: String, default: null },
+    idUser: String,
+    message: String,
+    created_at: { type: Date, default: Date.now },
+  })
+);
 
-module.exports = model("message", message);
+// MESSAGE
+//  |- id         : String  -> ID message
+//  |
+//  |- idRoom     : String  -> ID room
+//  |
+//  |- idGame     : String  -> ID game
+//  |
+//  |- idUser     : String  -> ID player send mess
+//  |
+//  |- message    : String  -> content message
+//  |
+//  '- created_at : Date    -> date create message
